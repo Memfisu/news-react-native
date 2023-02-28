@@ -1,20 +1,43 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import * as Font from 'expo-font';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
+import * as SplashScreen from 'expo-splash-screen';
+import MainStack from './navigate';
+
+const fonts = () => Font.loadAsync({
+  'mt-semibold': require('./assets/fonts/Montserrat-SemiBold.ttf'),
+  'mt-regular': require('./assets/fonts/Montserrat-Regular.ttf'),
+})
+
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+  const [appIsReady, setAppIsReady] = useState(false);
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+  useEffect(() => {
+    const fetchFonts = async () => {
+      try {
+        await fonts();
+        await new Promise(resolve => setTimeout(resolve, 2000)); // test for splashscreen
+      } catch (e) {
+        console.log(e)
+      }
+      finally {
+        setAppIsReady(true);
+      }
+    }
+
+    fetchFonts();
+  }, []);
+
+  useLayoutEffect(() => {
+    if (appIsReady) {
+      SplashScreen.hideAsync();
+    }
+  }, [appIsReady])
+
+  if (!appIsReady) {
+    return null;
+  }
+
+  return <MainStack />;
+}
